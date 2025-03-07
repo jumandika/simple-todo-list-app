@@ -1,19 +1,20 @@
-import React, { useMemo, useState } from "react";
-import { View, Button, Switch, ViewStyle, Pressable, ScrollView, FlatList } from "react-native";
-import { Controller, useForm } from "react-hook-form";
+import { color } from "@/assets/colors";
+import { ToDoItem } from "@/constant/interface";
+import { CommonActivities, Priorities, ToDoCategory } from "@/constant/StaticData";
+import { formatDateDDMMMYYYY } from "@/utils/formatter";
+import { yupResolver } from "@hookform/resolvers/yup";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { Picker } from '@react-native-picker/picker';
+import React, { useEffect, useMemo, useState } from "react";
+import { Controller, useForm } from "react-hook-form";
+import { FlatList, Pressable, ScrollView, Switch, View, ViewStyle } from "react-native";
 import * as yup from "yup";
-import { yupResolver } from "@hookform/resolvers/yup";
-import MyTextInput from "./MyTextInput";
-import MyText, { fontSize } from "./MyText";
-import { color } from "@/assets/colors";
-import Spacer from "./Spacer";
 import BottomAction from "./BottomAction";
-import MyButton from "./MyButton";
-import { ToDoCategory, Priorities, CommonActivities } from "@/constant/StaticData";
-import { formatDateDDMMMYYYY } from "@/utils/formatter";
 import Card from "./Card";
+import MyButton from "./MyButton";
+import MyText, { fontSize } from "./MyText";
+import MyTextInput from "./MyTextInput";
+import Spacer from "./Spacer";
 
 const schema = yup.object().shape({
     title: yup.string().required("Title is required"),
@@ -24,28 +25,45 @@ const schema = yup.object().shape({
     isCompleted: yup.boolean(),
 });
 
-const ToDoForm = ({ onSubmit }: any) => {
+interface ToDoFormProps {
+    onSubmit: any
+    itemDetails?: ToDoItem | any
+}
+const ToDoForm = ({ onSubmit, itemDetails }: ToDoFormProps) => {
     const [showDatePicker, setShowDatePicker] = useState<boolean>(false)
-
     const {
         control,
         handleSubmit,
         setValue,
+        getValues,
         watch,
         formState: { errors },
     } = useForm({
         resolver: yupResolver(schema),
         defaultValues: {
-            title: "",
-            description: "",
-            category: "",
-            priority: "",
-            dueDate: new Date(),
-            isCompleted: false,
+            title: itemDetails?.title || "",
+            description: itemDetails?.description || "",
+            category: itemDetails?.category || "",
+            priority: itemDetails?.priority || "",
+            dueDate: (itemDetails?.dueDate && new Date(itemDetails?.dueDate)) || new Date(),
+            isCompleted: itemDetails?.isCompleted || false,
         },
     });
 
+    useEffect(() => {
+        if (!itemDetails) {
+            return;
+        }
+        setValue('category', JSON.parse(itemDetails).category);
+        setValue('title', JSON.parse(itemDetails).title);
+        setValue('description', JSON.parse(itemDetails).description);
+        setValue('isCompleted', JSON.parse(itemDetails).isCompleted);
+        setValue('priority', JSON.parse(itemDetails).priority);
+        setValue('dueDate', new Date(JSON.parse(itemDetails)?.dueDate));
+    }, [itemDetails, setValue]); // Include setValue in dependencies
+
     const selectedDate = watch("dueDate");
+
     const cardStyle = useMemo<ViewStyle>(
         () => ({
             flex: 1,
@@ -53,12 +71,28 @@ const ToDoForm = ({ onSubmit }: any) => {
             height: 55,
             justifyContent: 'center',
             borderRadius: 12,
+            borderWidth: 1.5,
+            borderColor: color.gray,
+        }),
+        []
+    );
+    const validStyle = useMemo<ViewStyle>(
+        () => ({
+            borderColor: color.primary,
+            backgroundColor: color.primaryLight,
+        }),
+        []
+    );
+    const inValidStyle = useMemo<ViewStyle>(
+        () => ({
+            borderColor: color.red,
+            backgroundColor: color.secondaryLight,
         }),
         []
     );
     return (
         <View style={{ flex: 1, }}>
-            <ScrollView>
+            <ScrollView style={{ flex: 1 }}>
                 <View style={{ paddingHorizontal: 20 }}>
                     {/* Title Input */}
                     <Controller
@@ -116,7 +150,7 @@ const ToDoForm = ({ onSubmit }: any) => {
                         name="category"
                         render={({ field: { onChange, value }, formState: { errors } }) => (
                             <>
-                                <View style={cardStyle}>
+                                <View style={[cardStyle, value && validStyle, errors.category?.message && inValidStyle]}>
                                     <Picker
                                         selectedValue={value} onValueChange={onChange}>
                                         <Picker.Item color={color.text} fontFamily="Inter-Regular" style={{ fontSize: fontSize.m }} label="Select Category" value="" />
@@ -126,7 +160,7 @@ const ToDoForm = ({ onSubmit }: any) => {
                                     </Picker>
                                 </View>
                                 {
-                                    errors &&
+                                    errors.category?.message &&
                                     <MyText size='s' fontColor={color.red}>{errors.category?.message || ''}</MyText>
                                 }
                             </>
@@ -140,7 +174,7 @@ const ToDoForm = ({ onSubmit }: any) => {
                         name="priority"
                         render={({ field: { onChange, value }, formState: { errors } }) => (
                             <>
-                                <View style={cardStyle}>
+                                <View style={[cardStyle, value && validStyle, errors.priority?.message && inValidStyle]}>
                                     <Picker
                                         style={{ color: color.text }}
                                         selectedValue={value} onValueChange={onChange}>
@@ -151,7 +185,7 @@ const ToDoForm = ({ onSubmit }: any) => {
                                     </Picker>
                                 </View >
                                 {
-                                    errors &&
+                                    errors.priority?.message &&
                                     <MyText size='s' fontColor={color.red}>{errors.priority?.message || ''}</MyText>
                                 }
                             </>
@@ -162,7 +196,7 @@ const ToDoForm = ({ onSubmit }: any) => {
                     {/* Due Date Picker */}
                     <Pressable
                         onPress={() => setShowDatePicker((val) => !val)}
-                        style={[cardStyle, { paddingHorizontal: 12 }]}>
+                        style={[cardStyle, { paddingHorizontal: 12 }, getValues('dueDate') && validStyle,]}>
                         <MyText>{formatDateDDMMMYYYY(selectedDate) || `Due Date`}</MyText>
                     </Pressable>
                     {
@@ -199,7 +233,7 @@ const ToDoForm = ({ onSubmit }: any) => {
 
             {/* Submit Button */}
             <BottomAction>
-                <MyButton onPress={handleSubmit(onSubmit)} style={{ flex: 1, paddingHorizontal: 20 }} label='Create' />
+                <MyButton onPress={handleSubmit(onSubmit)} style={{ flex: 1, paddingHorizontal: 20 }} label='Update' />
             </BottomAction>
         </View>
     );

@@ -3,7 +3,7 @@ export interface ToDoItem {
     title: string; // Task title
     description?: string; // Optional detailed task description
     category: ToDoCategory; // Enum for task category
-    dueDate?: string; // Deadline (format: YYYY-MM-DD)
+    dueDate: string; // Deadline (format: YYYY-MM-DD)
     priority: "low" | "medium" | "high"; // Task priority level
     isCompleted: boolean; // Task completion status
     createdAt: string; // Task creation timestamp

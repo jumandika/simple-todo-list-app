@@ -1,5 +1,5 @@
 import { LinearGradient } from "expo-linear-gradient";
-import { View, ViewStyle } from "react-native";
+import { View, StyleSheet, ViewStyle } from "react-native";
 
 interface BottomActionProps {
     style?: ViewStyle;
@@ -15,13 +15,13 @@ const BottomAction = ({ style, children }: BottomActionProps) => {
     );
 };
 
-const styles = {
+const styles = StyleSheet.create({
     container: {
         flexDirection: "row",
         position: "absolute",
         bottom: 0,
         padding: 20,
-    } as ViewStyle,
+    },
     gradient: {
         flex: 1,
         height: "200%",
@@ -31,7 +31,7 @@ const styles = {
         top: 0,
         left: 0,
         right: 0,
-    } as ViewStyle,
-};
+    },
+})
 
 export default BottomAction;

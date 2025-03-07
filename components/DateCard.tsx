@@ -14,9 +14,10 @@ interface DateCardProps {
     index?: number;
     style?: ViewStyle;
     selected?: string;
+    allTasks?: boolean
 }
 
-const DateCard = ({ onPress, item, index, style, selected }: DateCardProps) => {
+const DateCard = ({ onPress, item, index, style, selected, allTasks }: DateCardProps) => {
     const [today, setToday] = useState<string>('')
     const [isSelected, setIsSelected] = useState<string>(selected || '')
     const currentSelected = isSelected === item.fullDate;
@@ -71,6 +72,18 @@ const DateCard = ({ onPress, item, index, style, selected }: DateCardProps) => {
             width: 15
         }),
         [currentSelected, isToday]
+    );
+
+    if (item.fullDate == "All Tasks") return (
+        <Pressable
+            key={index?.toString()}
+            onPress={onPress}
+            style={[dateCardStyle, style]}
+        >
+            <View style={signStyle} />
+            <Spacer height={6} />
+            <MyText style={dayStyle} size='xl' fontWeight='semiBold'>{'All Tasks'}</MyText>
+        </Pressable>
     );
 
     return (

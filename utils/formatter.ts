@@ -58,39 +58,23 @@ const getWeekWithNames = (date = new Date()) => {
     });
 }
 
-const sortTasksWithLastItemFirst = (tasks: ToDoItem[]) => {
-    const groupedTasks: Record<string, ToDoItem[]> = {};
+const sortAndGroupTasks = (tasks: ToDoItem[]) => {
+    // Step 1: Sort all tasks by createdAt (desc)
+    const sortedTasks = [...tasks].sort((a, b) => 
+        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    );
 
-    // Group tasks by category
-    tasks.forEach((task) => {
+    // Step 2: Group tasks by category while maintaining order
+    const groupedTasks: Record<string, ToDoItem[]> = {};
+    sortedTasks.forEach((task) => {
         if (!groupedTasks[task.category]) {
             groupedTasks[task.category] = [];
         }
         groupedTasks[task.category].push(task);
     });
 
-    // Sort each category group by createdAt (desc)
-    Object.keys(groupedTasks).forEach((category) => {
-        groupedTasks[category].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-    });
-
-    // Sort categories by the most recent createdAt within each category (desc)
-    const sortedCategories = Object.entries(groupedTasks).sort(([, groupA], [, groupB]) => {
-        return new Date(groupB[0].createdAt).getTime() - new Date(groupA[0].createdAt).getTime();
-    });
-
-    // Reorder: move the last item of each category right after the first one
-    const sortedTasks: ToDoItem[] = [];
-    sortedCategories.forEach(([, group]) => {
-        if (group.length > 1) {
-            // Keep the first task, move the last task next to it, then keep the rest
-            sortedTasks.push(group[0], group[group.length - 1], ...group.slice(1, -1));
-        } else {
-            sortedTasks.push(group[0]); // If only one item, keep it as is
-        }
-    });
-
-    return sortedTasks;
+    // Flatten the grouped tasks back into a single list
+    return Object.values(groupedTasks).flat();
 };
 
 export {
@@ -98,6 +82,6 @@ export {
     formatDateDDMMYYYY,
     formatDateDD,
     getWeekWithNames,
-    sortTasksWithLastItemFirst,
+    sortAndGroupTasks,
     timeAgo,
 }
