@@ -1,0 +1,13 @@
+{
+    "primary": "#2E3191",
+    "primaryLight": "#F0F0FA",
+    "secondary": "#F7921D",
+    "secondaryLight": "#F7921D15",
+    "white": "#FFFFFF",
+    "text": "#121212",
+    "gray": "#F3EFEE",
+    "darkGray": "#121212",
+    "border": "#9F9F9F",
+    "red": "#D42A33",
+    "green": "#28A138"
+}
