@@ -3,32 +3,43 @@ import MyText from '@/components/MyText';
 import Spacer from '@/components/Spacer';
 import ToDoForm from '@/components/ToDoForm';
 import { ToDoItem } from '@/constant/interface';
-import { updateTodo } from '@/utils/todoStorage';
+import { loadTodos, updateTodo } from '@/utils/todoStorage';
+import { Ionicons } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
-import { KeyboardAvoidingView, StatusBar, StyleSheet, View } from 'react-native';
+import { KeyboardAvoidingView, Pressable, StatusBar, StyleSheet, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function DetailsScreen() {
   const { itemDetails } = useLocalSearchParams()
-  console.log('item :>> ', itemDetails);
+  const { top } = useSafeAreaInsets()
+
+  let itemDetailsParsed = JSON.parse(itemDetails);
   const handleFormSubmit = async (data: ToDoItem) => {
-    const newTodo = {
+    const updatedTodo = {
       ...data,
-      id: Date.now().toString(),
-      createdAt: new Date().toISOString(),
+      id: itemDetailsParsed?.id,
+      updatedAt: new Date().toISOString(),
     };
-    await updateTodo(newTodo);
+    console.log('updatedTodo :>> ', updatedTodo);
+    await updateTodo(updatedTodo);
+    await loadTodos();
     router.back()
   };
   return (
-    <KeyboardAvoidingView behavior='height' style={styles.container}>
+    <KeyboardAvoidingView behavior='height' style={[styles.container, { paddingTop: top }]}>
       <StatusBar hidden={false} />
-      <Spacer height={20} />
-      <View style={{ paddingHorizontal: 20 }}>
-        <MyText fontWeight='semiBold' size='xxl'>{'Task Details'}</MyText>
-        <MyText fontColor={color.border} size='m'>{'You can edit this task and re-schedule to keep your productivity on track!'}</MyText>
+      <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+        <Pressable onPress={() => router.back()}>
+          <Ionicons name="chevron-back" size={40} />
+        </Pressable>
+        <Spacer width={6} />
+        <View style={{ flex: 1, paddingRight: 20 }}>
+          <MyText fontWeight='semiBold' size='xxl'>{'Task Details'}</MyText>
+          <MyText fontColor={color.border} size='m'>{'You can edit this task and re-schedule to keep your productivity on track!'}</MyText>
+        </View>
       </View>
-      <Spacer height={40} />
-      <ToDoForm itemDetails={itemDetails} onSubmit={handleFormSubmit} />
+      <Spacer height={20} />
+      <ToDoForm itemDetails={itemDetailsParsed} onSubmit={handleFormSubmit} />
     </KeyboardAvoidingView>
   );
 }

@@ -8,11 +8,13 @@ import MyText from '@/components/MyText';
 import MyTextInput from '@/components/MyTextInput';
 import Spacer from '@/components/Spacer';
 import { ToDoItem } from '@/constant/interface';
-import { formatDateDDMMYYYY, getWeekWithNames, sortAndGroupTasks, timeAgo } from '@/utils/formatter';
+import { completeTimeLabel, formatDateDDMMYYYY, getOverdueLabelStatus, getWeekWithNames, isOverdue, sortAndGroupTasks, timeAgo } from '@/utils/formatter';
 import { deleteTodo, loadTodos, saveTodos } from '@/utils/todoStorage';
+import { AntDesign, MaterialCommunityIcons } from '@expo/vector-icons';
 import { Link, router, useFocusEffect } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
 import { FlatList, KeyboardAvoidingView, ListRenderItem, Pressable, StatusBar, StyleSheet, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function DashboardScreen() {
     const [weekList, setWeekList] = useState<any>(null)
@@ -20,6 +22,7 @@ export default function DashboardScreen() {
     const [selectedDayTitle, setSelectedDayTitle] = useState<string>('')
     const [todos, setTodos] = useState<ToDoItem[]>([]);
     const [filteredTodos, setFilteredTodos] = useState<ToDoItem[]>([]);
+    const { top } = useSafeAreaInsets()
 
     useFocusEffect(useCallback(() => {
         if (selectedDay === "All Tasks") {
@@ -93,7 +96,12 @@ export default function DashboardScreen() {
 
     const renderItem: ListRenderItem<ToDoItem> = ({ item, index }) => {
         const showSection = item?.category.toLowerCase() === filteredTodos?.[index - 1]?.category.toLowerCase() ? false : true;
-        const dateInformation = timeAgo(item.createdAt);
+        const createdDateInformation = timeAgo(item.createdAt);
+        let dueDateInformation = completeTimeLabel(item.dueDate);
+        const overdueStatus = isOverdue(item.dueDate) && item.isCompleted === false;
+        if (overdueStatus) {
+            dueDateInformation = getOverdueLabelStatus(item.dueDate)
+        }
         return (
             <View>
                 {showSection &&
@@ -102,6 +110,12 @@ export default function DashboardScreen() {
                         <Spacer height={10} />
                     </>
                 }
+                <View style={styles.createdDateContainer}>
+                    <MyText fontColor={color.border} style={{ fontSize: 8, }} size='s'>{createdDateInformation}</MyText>
+                </View>
+                <Pressable style={styles.deleteButton} onPress={() => handleDelete(item.id)} >
+                    <AntDesign name='close' color={color.white} size={10} />
+                </Pressable>
                 <Card
                     onPress={() => {
                         router.navigate({
@@ -109,26 +123,34 @@ export default function DashboardScreen() {
                             params: { itemDetails: JSON.stringify(item) }
                         })
                     }}
-                    style={{ flexDirection: 'row', justifyContent: 'flex-start', padding: 16, paddingLeft: 16 }} >
+                    style={[styles.cardContainer, {
+                        borderColor: overdueStatus ? color.secondary : color.gray,
+                    }]} >
+                    {overdueStatus &&
+                        <View style={styles.overdueIndicator}>
+                            <MaterialCommunityIcons name="bell-alert" color={color.secondaryLight} style={{ transform: [{ rotate: '-45deg' }] }} size={100} />
+                        </View>
+                    }
                     <CheckBox checked={item.isCompleted} onPress={() => toggleTaskCompletion(item.id)} />
                     <Spacer width={10} />
                     <View style={{ flex: 1 }}>
-
                         <MyText strikeThrough={item.isCompleted} fontWeight='medium' >{item.title}</MyText>
-                        <MyText size='s'  >{dateInformation}</MyText>
+                        <View style={{ alignItems: 'center', flexDirection: 'row', }}>
+                            <MaterialCommunityIcons name="alarm" color={overdueStatus ? color.secondary : color.border} size={16} />
+                            <Spacer width={2} />
+                            <MyText size='s'>{dueDateInformation}</MyText>
+                        </View>
                     </View>
-                    <Pressable onPress={() => handleDelete(item.id)} >
-                        <MyText fontColor={color.border} fontWeight='italic' size='s'>{'remove'}</MyText>
-                    </Pressable>
                 </Card>
             </View>
         )
     }
 
     return (
-        <KeyboardAvoidingView behavior='height' style={styles.container}>
-            {/* <StatusBar hidden={true} /> */}
-            <Spacer height={10} />
+        <KeyboardAvoidingView
+            behavior='height' style={[styles.container, { paddingTop: top }]}
+        >
+            <StatusBar hidden={false} />
             <View style={{ paddingHorizontal: 20 }}>
                 <MyText fontWeight='semiBold' size='xxl'>{selectedDayTitle}</MyText>
             </View>
@@ -143,9 +165,8 @@ export default function DashboardScreen() {
                         windowSize={2}
                         updateCellsBatchingPeriod={100}
                         showsHorizontalScrollIndicator={false}
-                        contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 20, }}
+                        contentContainerStyle={styles.dateCardContainer}
                         data={weekList}
-
                         ItemSeparatorComponent={() => <Spacer width={10} />}
                         renderItem={({ item, index }) =>
                             <DateCard
@@ -166,11 +187,11 @@ export default function DashboardScreen() {
                     maxToRenderPerBatch={1}
                     windowSize={2}
                     updateCellsBatchingPeriod={100}
-                    contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 100 }}
+                    contentContainerStyle={styles.listContainer}
                     keyExtractor={item => item.id}
                     ItemSeparatorComponent={() => <Spacer height={15} />}
                     renderItem={renderItem}
-                    ListEmptyComponent={() => <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', paddingTop: 100 }}>
+                    ListEmptyComponent={() => <View style={styles.emptyListContainer}>
                         <MyText fontWeight='semiBold' size='xxl'>{'Nothing to do'}</MyText>
                         <MyText>{`Create a task by clicking on 'Add' below!`}</MyText>
                     </View>}
@@ -185,7 +206,7 @@ export default function DashboardScreen() {
                 </Link>
                 <Spacer width={10} />
                 <Link href="/createToDo" asChild>
-                    <MyButton style={{ paddingHorizontal: 20 }} label='Add' />
+                    <MyButton style={styles.addButton} label='Add' />
                 </Link>
             </BottomAction>
         </KeyboardAvoidingView>
@@ -198,5 +219,67 @@ const styles = StyleSheet.create({
         paddingTop: 20,
         backgroundColor: color.white,
     },
+    categoryText: {
+        paddingLeft: 10,
+    },
+    createdDateContainer: {
+        borderBottomLeftRadius: 10,
+        marginBottom: -16,
+        zIndex: 10,
+        backgroundColor: color.white,
+        alignSelf: 'flex-end',
+        padding: 2,
+        paddingHorizontal: 8,
+        paddingRight: 20,
+    },
+    createdDateText: {
+        fontSize: 8,
+    },
+    deleteButton: {
+        height: 20,
+        width: 20,
+        alignItems: 'center',
+        justifyContent: 'center',
+        borderRadius: 30,
+        marginBottom: -20,
+        marginRight: -6,
+        zIndex: 10,
+        backgroundColor: color.secondary,
+        alignSelf: 'flex-end',
+    },
+    cardContainer: {
+        borderWidth: 1,
+        overflow: 'hidden',
+        flexDirection: 'row',
+        justifyContent: 'flex-start',
+        padding: 10,
+        paddingLeft: 12,
+    },
+    overdueIndicator: {
+        alignItems: 'center',
+        flexDirection: 'row',
+        position: 'absolute',
+        top: -30,
+        left: -30,
+    },
+    dateCardContainer: {
+        paddingHorizontal: 20,
+        paddingBottom: 20,
+    },
+    listContainer: {
+        paddingHorizontal: 20,
+        paddingBottom: 100,
+    },
+    emptyListContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        paddingTop: 100,
+    },
+    bottomInputContainer: {
+        flex: 1,
+    },
+    addButton: {
+        paddingHorizontal: 20,
+    },
 });
-

@@ -4,27 +4,30 @@ import MyButton from '@/components/MyButton';
 import MyText from '@/components/MyText';
 import { CommonActivities } from '@/constant/StaticData';
 import { Link } from 'expo-router';
-import { StatusBar } from 'expo-status-bar';
+import { StatusBar, } from 'expo-status-bar';
 import { LinearGradient } from 'expo-linear-gradient';
 import { FlatList, Image, ScrollView, StyleSheet, View } from 'react-native';
 import Spacer from '@/components/Spacer';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+
 
 export default function HomeScreen() {
+  const insets = useSafeAreaInsets()
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { paddingTop: insets.top }]}>
       <StatusBar hidden={true} />
       <Image source={require("../assets/images/gradient.png")} style={{ resizeMode: 'cover', position: 'absolute', top: 0, left: 0 }} />
       <View style={{ paddingHorizontal: 20 }}>
         <View style={{ flexDirection: 'row', alignItems: 'center' }} >
           <Image source={require("../assets/images/nusa-mandiri.png")} style={{ height: 30, width: 30 }} />
-          <Spacer width={10}/>
+          <Spacer width={10} />
           <MyText style={{ color: color.primary, }} fontWeight='semiBold' size='m'>{`Nusa Mandiri University`}</MyText>
         </View>
         <View style={{ paddingVertical: 20 }}>
           <MyText style={{ color: color.primary }} fontWeight='semiBold' size='xxl'>{`Hi, Students`}</MyText>
           <MyText style={{ color: color.primary }} fontWeight='bold' size='xl'>{`of Nusa Mandiri Jatiwaringin!`}</MyText>
         </View>
-      <MyText style={{ color: color.secondary, }} fontWeight='bold' size='xxl'>{`Simple Todo List App`}</MyText>
+        <MyText style={{ color: color.secondary, }} fontWeight='bold' size='xxl'>{`Simple Todo List App`}</MyText>
       </View>
       <View >
         <MyText style={{ color: color.secondary, paddingLeft: 20, marginBottom: 10 }} fontWeight='semiBold' size='m'>{`Common Activities`}</MyText>
@@ -49,7 +52,7 @@ export default function HomeScreen() {
           <LinearGradient
             start={{ x: 1, y: 0 }}
             end={{ x: 0.8, y: 0 }}
-            colors={['#fff', 'transparent']}
+            colors={['#fff', '#ffffff10']}
             style={{
               position: 'absolute',
               left: 0,
@@ -61,7 +64,7 @@ export default function HomeScreen() {
           <LinearGradient
             start={{ x: 0, y: 0 }}
             end={{ x: 0.2, y: 0 }}
-            colors={['#fff', 'transparent']}
+            colors={['#fff', '#ffffff10']}
             style={{
               position: 'absolute',
               left: 0,

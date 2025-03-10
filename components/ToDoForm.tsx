@@ -1,7 +1,8 @@
 import { color } from "@/assets/colors";
 import { ToDoItem } from "@/constant/interface";
 import { CommonActivities, Priorities, ToDoCategory } from "@/constant/StaticData";
-import { formatDateDDMMMYYYY } from "@/utils/formatter";
+import { formatOnlyDate, formatOnlyTime } from "@/utils/formatter";
+import { AntDesign } from "@expo/vector-icons";
 import { yupResolver } from "@hookform/resolvers/yup";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { Picker } from '@react-native-picker/picker';
@@ -31,6 +32,7 @@ interface ToDoFormProps {
 }
 const ToDoForm = ({ onSubmit, itemDetails }: ToDoFormProps) => {
     const [showDatePicker, setShowDatePicker] = useState<boolean>(false)
+    const [showTimePicker, setShowTimePicker] = useState<boolean>(false)
     const {
         control,
         handleSubmit,
@@ -54,12 +56,12 @@ const ToDoForm = ({ onSubmit, itemDetails }: ToDoFormProps) => {
         if (!itemDetails) {
             return;
         }
-        setValue('category', JSON.parse(itemDetails).category);
-        setValue('title', JSON.parse(itemDetails).title);
-        setValue('description', JSON.parse(itemDetails).description);
-        setValue('isCompleted', JSON.parse(itemDetails).isCompleted);
-        setValue('priority', JSON.parse(itemDetails).priority);
-        setValue('dueDate', new Date(JSON.parse(itemDetails)?.dueDate));
+        setValue('category', itemDetails.category);
+        setValue('title', itemDetails.title);
+        setValue('description', itemDetails.description);
+        setValue('isCompleted', itemDetails.isCompleted);
+        setValue('priority', itemDetails.priority);
+        setValue('dueDate', new Date(itemDetails?.dueDate));
     }, [itemDetails, setValue]); // Include setValue in dependencies
 
     const selectedDate = watch("dueDate");
@@ -68,7 +70,7 @@ const ToDoForm = ({ onSubmit, itemDetails }: ToDoFormProps) => {
         () => ({
             flex: 1,
             backgroundColor: color.gray,
-            height: 55,
+            minHeight: 55,
             justifyContent: 'center',
             borderRadius: 12,
             borderWidth: 1.5,
@@ -91,7 +93,7 @@ const ToDoForm = ({ onSubmit, itemDetails }: ToDoFormProps) => {
         []
     );
     return (
-        <View style={{ flex: 1, }}>
+        <View style={{ flex: 1 }}>
             <ScrollView style={{ flex: 1 }}>
                 <View style={{ paddingHorizontal: 20 }}>
                     {/* Title Input */}
@@ -196,8 +198,9 @@ const ToDoForm = ({ onSubmit, itemDetails }: ToDoFormProps) => {
                     {/* Due Date Picker */}
                     <Pressable
                         onPress={() => setShowDatePicker((val) => !val)}
-                        style={[cardStyle, { paddingHorizontal: 12 }, getValues('dueDate') && validStyle,]}>
-                        <MyText>{formatDateDDMMMYYYY(selectedDate) || `Due Date`}</MyText>
+                        style={[cardStyle, { paddingHorizontal: 12, flexDirection: 'row', alignItems: 'center', justifyContent: "space-between" }, getValues('dueDate') && validStyle,]}>
+                        <MyText fontWeight="medium">{formatOnlyDate(selectedDate) || `Due Date`}</MyText>
+                        <AntDesign name="calendar" color={color.primary} size={18} />
                     </Pressable>
                     {
                         showDatePicker &&
@@ -213,7 +216,33 @@ const ToDoForm = ({ onSubmit, itemDetails }: ToDoFormProps) => {
                                 }
                             }}
                             textColor={color.text}
+                            style={{ paddingTop: 10 }}
 
+
+                        />
+                    }
+                    <Spacer height={20} />
+                    <Pressable
+                        onPress={() => setShowTimePicker((val) => !val)}
+                        style={[cardStyle, { paddingHorizontal: 12, flexDirection: 'row', alignItems: 'center', justifyContent: "space-between" }, getValues('dueDate') && validStyle,]}>
+                        <MyText fontWeight="medium">{formatOnlyTime(selectedDate) || `Due Date`}</MyText>
+                        <AntDesign name="clockcircleo" color={color.primary} size={18} />
+                    </Pressable>
+                    {
+                        showTimePicker &&
+                        <DateTimePicker
+                            value={selectedDate}
+                            mode="time"
+                            display="default"
+                            accentColor={color.primary}
+                            onChange={(_, date) => {
+                                if (date) {
+                                    setValue("dueDate", date)
+                                    setShowTimePicker(false)
+                                }
+                            }}
+                            style={{ paddingTop: 10 }}
+                            textColor={color.text}
                         />
                     }
                     <Spacer height={10} />
@@ -229,11 +258,12 @@ const ToDoForm = ({ onSubmit, itemDetails }: ToDoFormProps) => {
                         )}
                     />
                 </View>
+                <Spacer height={100} />
             </ScrollView>
 
             {/* Submit Button */}
             <BottomAction>
-                <MyButton onPress={handleSubmit(onSubmit)} style={{ flex: 1, paddingHorizontal: 20 }} label='Update' />
+                <MyButton onPress={handleSubmit(onSubmit)} style={{ flex: 1, paddingHorizontal: 20 }} label={itemDetails ? 'Update' : 'Create'} />
             </BottomAction>
         </View>
     );

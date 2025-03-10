@@ -29,21 +29,21 @@ const CheckBox = ({ onPress, checked = false, style }: CheckBoxProps) => {
 
     const checkBoxCheckStyle = useMemo<ViewStyle>(
         () => ({
-            backgroundColor: color.secondary,
+            backgroundColor: color.primary,
             height: 25,
             width: 25,
             justifyContent: "center",
             alignItems: "center",
             borderRadius: 6,
             borderWidth: 1.6,
-            borderColor: color.secondary
+            borderColor: color.primary
         }),
         []
     );
 
     const checkBoxHighlightStyle = useMemo<ViewStyle>(
         () => ({
-            backgroundColor: color.secondary,
+            backgroundColor: color.primary,
             top: -12.5,
             height: 50,
             width: 50,
