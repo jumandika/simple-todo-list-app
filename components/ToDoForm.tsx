@@ -102,6 +102,7 @@ const ToDoForm = ({ onSubmit, itemDetails }: ToDoFormProps) => {
                         name="title"
                         render={({ field: { onChange, value }, formState: { errors } }) => (
                             <MyTextInput
+                                autoFocus={!itemDetails}
                                 value={value}
                                 placeholder="Write your task title..."
                                 onChangeText={onChange}
