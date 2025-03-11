@@ -4,7 +4,7 @@ import Spacer from '@/components/Spacer';
 import ToDoForm from '@/components/ToDoForm';
 import { ToDoItem } from '@/constant/interface';
 import { addTodo } from '@/utils/todoStorage';
-import { Ionicons } from '@expo/vector-icons';
+import { AntDesign, Feather } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { KeyboardAvoidingView, Pressable, StatusBar, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -27,7 +27,7 @@ export default function CreateToDoScreen() {
             <StatusBar hidden={false} />
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                 <Pressable onPress={() => router.back()}>
-                    <Ionicons name="chevron-back" size={40} />
+                    <Feather name="chevron-left" size={40} color={color.text} />
                 </Pressable>
                 <Spacer width={6} />
                 <View style={{ flex: 1, paddingRight: 20 }}>

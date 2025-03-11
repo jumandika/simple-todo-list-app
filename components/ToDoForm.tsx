@@ -253,7 +253,8 @@ const ToDoForm = ({ onSubmit, itemDetails }: ToDoFormProps) => {
                         render={({ field: { onChange, value }, formState: { errors } }) => (
                             <View style={{ flexDirection: "row", alignItems: "center", }}>
                                 <Switch value={value} onValueChange={onChange} />
-                                <MyText>Completed?</MyText>
+                                <Spacer width={10} />
+                                <MyText>{value ? "Completed!" : "Completed?"}</MyText>
                             </View>
                         )}
                     />

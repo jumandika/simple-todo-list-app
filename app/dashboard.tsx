@@ -2,7 +2,7 @@ import { color } from '@/assets/colors';
 import BottomAction from '@/components/BottomAction';
 import Card from '@/components/Card';
 import CheckBox from '@/components/CheckBox';
-import DateCard from '@/components/DateCard';
+import DateList from '@/components/DateList';
 import MyButton from '@/components/MyButton';
 import MyText from '@/components/MyText';
 import MyTextInput from '@/components/MyTextInput';
@@ -31,7 +31,6 @@ export default function DashboardScreen() {
             getFilteredList()
         }
     }, [selectedDay]))
-
 
     const getAllList = async () => {
         await loadTodos().then((val) => {
@@ -73,7 +72,7 @@ export default function DashboardScreen() {
             }
             return;
         }
-        setSelectedDayTitle('Today')
+        setSelectedDayTitle('All Task')
     }, [selectedDay])
 
 
@@ -156,30 +155,13 @@ export default function DashboardScreen() {
             </View>
             <Spacer height={10} />
             <View style={{ flex: 1 }}>
-                <View>
-                    <FlatList
-                        horizontal
-                        removeClippedSubviews
-                        initialNumToRender={2}
-                        maxToRenderPerBatch={2}
-                        windowSize={2}
-                        updateCellsBatchingPeriod={100}
-                        showsHorizontalScrollIndicator={false}
-                        contentContainerStyle={styles.dateCardContainer}
-                        data={weekList}
-                        ItemSeparatorComponent={() => <Spacer width={10} />}
-                        renderItem={({ item, index }) =>
-                            <DateCard
-                                onPress={() => {
-                                    setSelectedDay(item.fullDate)
-                                }}
-                                selected={selectedDay}
-                                item={item}
-                                index={index}
-                            />
-                        }
-                    />
-                </View>
+                <DateList
+                    weekList={weekList}
+                    selectedDay={selectedDay}
+                    setSelectedDay={setSelectedDay}
+                />
+
+                <Spacer height={20} />
                 <FlatList
                     data={filteredTodos}
                     removeClippedSubviews
@@ -264,7 +246,6 @@ const styles = StyleSheet.create({
     },
     dateCardContainer: {
         paddingHorizontal: 20,
-        paddingBottom: 20,
     },
     listContainer: {
         paddingHorizontal: 20,
