@@ -5,7 +5,7 @@ import MyText from "./MyText"
 
 interface MyTextInputProps extends Omit<TextInputProps, 'style' | 'value' | 'onChangeText'> {
     value: string | any
-    onChangeText: (value: string) => void
+    onChangeText?: (value: string) => void
     placeholder?: string
     style?: ViewStyle
     textStyle?: TextStyle
