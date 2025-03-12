@@ -10,7 +10,7 @@ import { KeyboardAvoidingView, Pressable, StatusBar, StyleSheet, View } from 're
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function DetailsScreen() {
-  const { itemDetails } = useLocalSearchParams()
+  const { itemDetails } = useLocalSearchParams<any>()
   const { top } = useSafeAreaInsets()
 
   let itemDetailsParsed = JSON.parse(itemDetails);

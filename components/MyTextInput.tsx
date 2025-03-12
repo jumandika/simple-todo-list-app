@@ -4,7 +4,8 @@ import { TextInput, TextInputProps, TextStyle, View, ViewStyle } from "react-nat
 import MyText from "./MyText"
 
 interface MyTextInputProps extends Omit<TextInputProps, 'style' | 'value' | 'onChangeText'> {
-    value: string
+    value: string | any
+    onChangeText: (value: string) => void
     placeholder?: string
     style?: ViewStyle
     textStyle?: TextStyle
@@ -13,7 +14,7 @@ interface MyTextInputProps extends Omit<TextInputProps, 'style' | 'value' | 'onC
     errorMessage?: string
 }
 
-const MyTextInput: FC<MyTextInputProps> = ({ value, placeholder, style, textStyle, size = 'm', fontWeight = 'medium', errorMessage = '', ...rest }) => {
+const MyTextInput: FC<MyTextInputProps> = ({ value, onChangeText, placeholder, style, textStyle, size = 'm', fontWeight = 'medium', errorMessage = '', ...rest }) => {
     const fontVariant = {
         'regular': 'Inter-Regular',
         'bold': 'Inter-Bold',
@@ -61,6 +62,7 @@ const MyTextInput: FC<MyTextInputProps> = ({ value, placeholder, style, textStyl
                 <TextInput
                     value={value}
                     placeholder={placeholder}
+                    onChangeText={onChangeText}
                     style={{
                         color: color.text,
                         fontFamily: fontVariant[fontWeight],

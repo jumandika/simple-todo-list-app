@@ -6,7 +6,7 @@ import { useMemo } from "react";
 interface CardProps {
     onPress?: () => void;
     label?: string;
-    style?: ViewStyle;
+    style?: ViewStyle | ViewStyle[];
     children?: React.ReactNode
     fontSize?: number;
 }
