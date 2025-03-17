@@ -22,6 +22,7 @@ const MyTextInput: FC<MyTextInputProps> = ({ value, onChangeText, placeholder, s
         'semiBold': 'Inter-SemiBold',
         'medium': 'Inter-Medium',
     }
+    
     const fontSize = {
         's': 10,
         'm': 14,
@@ -29,6 +30,7 @@ const MyTextInput: FC<MyTextInputProps> = ({ value, onChangeText, placeholder, s
         'xl': 22,
         'xxl': 36,
     }
+
     const cardStyle = useMemo<ViewStyle>(
         () => ({
             flex: 1,
