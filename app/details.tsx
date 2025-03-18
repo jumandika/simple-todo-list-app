@@ -18,6 +18,7 @@ export default function DetailsScreen() {
     const updatedTodo = {
       ...data,
       id: itemDetailsParsed?.id,
+      createdAt: itemDetailsParsed?.createdAt,
       updatedAt: new Date().toISOString(),
     };
     console.log('updatedTodo :>> ', updatedTodo);

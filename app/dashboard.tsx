@@ -123,6 +123,7 @@ export default function DashboardScreen() {
                         })
                     }}
                     style={[styles.cardContainer, {
+                        backgroundColor: item.isCompleted ? color.primaryLight : color.gray,
                         borderColor: overdueStatus ? color.secondary : color.gray,
                     }]} >
                     {overdueStatus &&
