@@ -101,6 +101,8 @@ export default function DashboardScreen() {
         if (overdueStatus) {
             dueDateInformation = getOverdueLabelStatus(item.dueDate)
         }
+        const backgroundColor = item.isCompleted ? color.primaryLight : color.gray
+        const borderColor = item.isCompleted ? color.primary : overdueStatus ? color.secondary : color.gray
         return (
             <View>
                 {showSection &&
@@ -123,8 +125,8 @@ export default function DashboardScreen() {
                         })
                     }}
                     style={[styles.cardContainer, {
-                        backgroundColor: item.isCompleted ? color.primaryLight : color.gray,
-                        borderColor: overdueStatus ? color.secondary : color.gray,
+                        backgroundColor,
+                        borderColor,
                     }]} >
                     {overdueStatus &&
                         <View style={styles.overdueIndicator}>
@@ -150,7 +152,7 @@ export default function DashboardScreen() {
         <KeyboardAvoidingView
             behavior='height' style={[styles.container, { paddingTop: top }]}
         >
-            <StatusBar hidden={false} />
+            <StatusBar hidden={false} barStyle={'default'} />
             <View style={{ paddingHorizontal: 20 }}>
                 <MyText fontWeight='semiBold' size='xxl'>{selectedDayTitle}</MyText>
             </View>
@@ -161,7 +163,6 @@ export default function DashboardScreen() {
                     selectedDay={selectedDay}
                     setSelectedDay={setSelectedDay}
                 />
-
                 <Spacer height={20} />
                 <FlatList
                     data={filteredTodos}
