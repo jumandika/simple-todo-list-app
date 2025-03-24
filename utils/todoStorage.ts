@@ -33,10 +33,8 @@ export const addTodo = async (newTodo: ToDoItem) => {
 
 // Update To-Do
 export const updateTodo = async (updatedTodo: ToDoItem) => {
-    console.log('updatedTodo :>> ', updatedTodo.id);
     let todos = await loadTodos();
     todos = todos.map(todo => todo.id === updatedTodo.id ? updatedTodo : todo);
-    console.log('todos :>> ', todos);
     await saveTodos(todos);
 };
 

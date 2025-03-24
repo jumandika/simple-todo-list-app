@@ -3,6 +3,7 @@ import BottomAction from '@/components/BottomAction';
 import Card from '@/components/Card';
 import CheckBox from '@/components/CheckBox';
 import DateList from '@/components/DateList';
+import LoadingTaskList from '@/components/LoadingTaskList';
 import MyButton from '@/components/MyButton';
 import MyText from '@/components/MyText';
 import MyTextInput from '@/components/MyTextInput';
@@ -21,6 +22,7 @@ export default function DashboardScreen() {
     const [selectedDay, setSelectedDay] = useState<string>('All Tasks')
     const [selectedDayTitle, setSelectedDayTitle] = useState<string>('')
     const [todos, setTodos] = useState<ToDoItem[]>([]);
+    const [isLoading, setIsLoading] = useState<boolean>(false);
     const [filteredTodos, setFilteredTodos] = useState<ToDoItem[]>([]);
     const { top } = useSafeAreaInsets()
 
@@ -33,15 +35,22 @@ export default function DashboardScreen() {
     }, [selectedDay]))
 
     const getAllList = async () => {
+        setIsLoading(true)
         await loadTodos().then((val) => {
             setTodos(sortAndGroupTasks(val))
             setFilteredTodos(sortAndGroupTasks(val));
+            setTimeout(() => {
+                setIsLoading(false)
+            }, 1000);
         });
     }
+
     const getFilteredList = async () => {
+        setIsLoading(true)
         const val = await loadTodos();
         const filtered = val.filter((item) => formatDateDDMMYYYY(new Date(item.dueDate)) === selectedDay)
         setFilteredTodos(sortAndGroupTasks(filtered));
+        setIsLoading(false)
     }
 
     const handleDelete = async (id: string) => {
@@ -137,6 +146,7 @@ export default function DashboardScreen() {
                     <Spacer width={10} />
                     <View style={{ flex: 1 }}>
                         <MyText strikeThrough={item.isCompleted} fontWeight='medium' >{item.title}</MyText>
+                        <Spacer height={4} />
                         <View style={{ alignItems: 'center', flexDirection: 'row', }}>
                             <MaterialCommunityIcons name="alarm" color={overdueStatus ? color.secondary : color.border} size={16} />
                             <Spacer width={2} />
@@ -164,22 +174,26 @@ export default function DashboardScreen() {
                     setSelectedDay={setSelectedDay}
                 />
                 <Spacer height={20} />
-                <FlatList
-                    data={filteredTodos}
-                    removeClippedSubviews
-                    initialNumToRender={1}
-                    maxToRenderPerBatch={1}
-                    windowSize={2}
-                    updateCellsBatchingPeriod={100}
-                    contentContainerStyle={styles.listContainer}
-                    keyExtractor={item => item.id}
-                    ItemSeparatorComponent={() => <Spacer height={15} />}
-                    renderItem={renderItem}
-                    ListEmptyComponent={() => <View style={styles.emptyListContainer}>
-                        <MyText fontWeight='semiBold' size='xxl'>{'Nothing to do'}</MyText>
-                        <MyText>{`Create a task by clicking on 'Add' below!`}</MyText>
-                    </View>}
-                />
+                {isLoading ?
+                    <LoadingTaskList />
+                    :
+                    <FlatList
+                        data={filteredTodos}
+                        removeClippedSubviews
+                        initialNumToRender={1}
+                        maxToRenderPerBatch={1}
+                        windowSize={2}
+                        updateCellsBatchingPeriod={100}
+                        contentContainerStyle={styles.listContainer}
+                        keyExtractor={item => item.id}
+                        ItemSeparatorComponent={() => <Spacer height={15} />}
+                        renderItem={renderItem}
+                        ListEmptyComponent={() => <View style={styles.emptyListContainer}>
+                            <MyText fontWeight='semiBold' size='xxl'>{'Nothing to do'}</MyText>
+                            <MyText>{`Create a task by clicking on 'Add' below!`}</MyText>
+                        </View>}
+                    />
+                }
             </View>
 
             <BottomAction>
