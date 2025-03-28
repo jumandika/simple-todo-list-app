@@ -2,6 +2,7 @@ import { color } from "@/assets/colors";
 import { Pressable, ViewStyle } from "react-native";
 import MyText from "./MyText";
 import { useMemo } from "react";
+import { TouchableOpacity } from "react-native";
 
 interface CardProps {
     onPress?: () => void;
@@ -25,7 +26,7 @@ const Card = ({ onPress, label, style, children, fontSize }: CardProps) => {
     );
 
     return (
-        <Pressable onPress={onPress} style={[cardStyle, style]}>
+        <TouchableOpacity onPress={onPress} style={[cardStyle, style]}>
             {label &&
                 <MyText fontWeight="medium" size="m" style={{ fontSize }} >
                     {label}
@@ -34,7 +35,7 @@ const Card = ({ onPress, label, style, children, fontSize }: CardProps) => {
             {
                 children
             }
-        </Pressable>
+        </TouchableOpacity>
     );
 };
 
