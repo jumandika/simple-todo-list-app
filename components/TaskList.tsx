@@ -1,17 +1,14 @@
 import { color } from "@/assets/colors";
 import { ToDoItem } from "@/constant/interface";
-import { timeAgo, completeTimeLabel, isOverdue, getOverdueLabelStatus, formatDateDDMMYYYY, sortAndGroupTasks } from "@/utils/formatter";
-import { AntDesign, MaterialCommunityIcons } from "@expo/vector-icons";
-import { router, useFocusEffect } from "expo-router";
-import { useState, useCallback, useEffect } from "react";
-import { FlatList, ListRenderItem, Pressable, View, StyleSheet, LayoutAnimation, UIManager, Platform } from "react-native";
-import Card from "./Card";
-import CheckBox from "./CheckBox";
+import { formatDateDDMMYYYY, sortAndGroupTasks } from "@/utils/formatter";
+import { deleteTodo, loadTodos, saveTodos } from "@/utils/todoStorage";
+import { useFocusEffect } from "expo-router";
+import { useCallback, useEffect, useState } from "react";
+import { FlatList, LayoutAnimation, ListRenderItem, Platform, StyleSheet, UIManager, View } from "react-native";
+import LoadingTaskList from "./LoadingTaskList";
 import MyText from "./MyText";
 import Spacer from "./Spacer";
-import { loadTodos, deleteTodo, saveTodos } from "@/utils/todoStorage";
-import LoadingTaskList from "./LoadingTaskList";
-import LoadingContent from "./LoadingContent";
+import TaskContent from "./TaskContent";
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
     UIManager.setLayoutAnimationEnabledExperimental(true);
@@ -25,15 +22,17 @@ const TaskList = ({ selectedDay }: TaskListProps) => {
     const [todos, setTodos] = useState<ToDoItem[]>([]);
     const [isLoading, setIsLoading] = useState<boolean>(true);
     const [filteredTodos, setFilteredTodos] = useState<ToDoItem[]>([]);
-    const [deletedID, setDeletedID] = useState<string | null>(null);
+    const [activeID, setActiveID] = useState<string | null>(null);
 
     useEffect(() => {
         LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
     }, [isLoading]);
 
     useFocusEffect(useCallback(() => {
+        if (activeID) {
+            setIsLoading(false)
+        }
         if (selectedDay === "All Tasks") {
-            setIsLoading(true)
             getAllList()
             setTimeout(() => {
                 setIsLoading(false)
@@ -41,12 +40,15 @@ const TaskList = ({ selectedDay }: TaskListProps) => {
         } else {
             getFilteredList()
         }
-    }, [selectedDay]))
+    }, [selectedDay, activeID]))
 
     const getAllList = async () => {
         await loadTodos().then((val) => {
             setTodos(sortAndGroupTasks(val))
             setFilteredTodos(sortAndGroupTasks(val));
+            setTimeout(() => {
+                setActiveID(null)
+            }, 1000);
 
         });
     }
@@ -60,7 +62,7 @@ const TaskList = ({ selectedDay }: TaskListProps) => {
     }
 
     const handleDelete = async (id: string) => {
-        setDeletedID(id)
+        setActiveID(id)
         await deleteTodo(id);
         await new Promise(resolve => setTimeout(resolve, 1000));
         if (selectedDay === "All Tasks") {
@@ -68,7 +70,7 @@ const TaskList = ({ selectedDay }: TaskListProps) => {
         } else {
             await getFilteredList()
         }
-        setDeletedID(null)
+        setActiveID(null)
 
     };
 
@@ -92,14 +94,6 @@ const TaskList = ({ selectedDay }: TaskListProps) => {
 
     const renderItem: ListRenderItem<ToDoItem> = useCallback(({ item, index }) => {
         const showSection = item?.category.toLowerCase() === filteredTodos?.[index - 1]?.category.toLowerCase() ? false : true;
-        const createdDateInformation = timeAgo(item.createdAt);
-        let dueDateInformation = completeTimeLabel(item.dueDate);
-        const overdueStatus = isOverdue(item.dueDate) && item.isCompleted === false;
-        if (overdueStatus) {
-            dueDateInformation = getOverdueLabelStatus(item.dueDate)
-        }
-        const backgroundColor = item.isCompleted ? color.primaryLight : color.gray
-        const borderColor = item.isCompleted ? color.primary : overdueStatus ? color.secondary : color.gray
         return (
             <View>
                 {showSection &&
@@ -108,49 +102,16 @@ const TaskList = ({ selectedDay }: TaskListProps) => {
                         <Spacer height={10} />
                     </>
                 }
-                {deletedID == item.id ?
-                    <LoadingContent />
-                    :
-                    <>
-                        <View style={styles.createdDateContainer}>
-                            <MyText fontColor={color.border} style={{ fontSize: 8, }} size='s'>{createdDateInformation}</MyText>
-                        </View>
-                        <Pressable style={styles.deleteButton} onPress={() => handleDelete(item.id)} >
-                            <AntDesign name='close' color={color.white} size={10} />
-                        </Pressable>
-                        <Card
-                            onPress={() => {
-                                router.navigate({
-                                    pathname: '/details',
-                                    params: { itemDetails: JSON.stringify(item) }
-                                })
-                            }}
-                            style={[styles.cardContainer, {
-                                backgroundColor,
-                                borderColor,
-                            }]} >
-                            {overdueStatus &&
-                                <View style={styles.overdueIndicator}>
-                                    <MaterialCommunityIcons name="bell-alert" color={color.secondaryLight} style={{ transform: [{ rotate: '-45deg' }] }} size={100} />
-                                </View>
-                            }
-                            <CheckBox checked={item.isCompleted} onPress={() => toggleTaskCompletion(item.id)} />
-                            <Spacer width={10} />
-                            <View style={{ flex: 1 }}>
-                                <MyText strikeThrough={item.isCompleted} fontWeight='medium' >{item.title}</MyText>
-                                <Spacer height={4} />
-                                <View style={{ alignItems: 'center', flexDirection: 'row', }}>
-                                    <MaterialCommunityIcons name="alarm" color={overdueStatus ? color.secondary : color.border} size={16} />
-                                    <Spacer width={2} />
-                                    <MyText size='s'>{dueDateInformation}</MyText>
-                                </View>
-                            </View>
-                        </Card>
-                    </>
-                }
+                <TaskContent
+                    activeID={activeID}
+                    handleDelete={handleDelete}
+                    item={item}
+                    setActiveID={setActiveID}
+                    toggleTaskCompletion={toggleTaskCompletion}
+                />
             </View>
         )
-    }, [isLoading, filteredTodos, deletedID])
+    }, [isLoading, filteredTodos, activeID])
 
     return (
         isLoading ? <LoadingTaskList /> :

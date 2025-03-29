@@ -1,8 +1,7 @@
 import { color } from "@/assets/colors";
-import { Pressable, ViewStyle } from "react-native";
-import MyText from "./MyText";
 import { useMemo } from "react";
-import { TouchableOpacity } from "react-native";
+import { TouchableOpacity, ViewStyle } from "react-native";
+import MyText from "./MyText";
 
 interface CardProps {
     onPress?: () => void;
