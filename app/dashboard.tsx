@@ -9,7 +9,7 @@ import TaskList from '@/components/TaskList';
 import { formatDateDDMMYYYY, getWeekWithNames } from '@/utils/formatter';
 import { Link } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { KeyboardAvoidingView, Pressable, StatusBar, StyleSheet, View } from 'react-native';
+import { Pressable, StatusBar, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function DashboardScreen() {
@@ -43,8 +43,8 @@ export default function DashboardScreen() {
 
 
     return (
-        <KeyboardAvoidingView
-            behavior='height' style={[styles.container, { paddingTop: top }]}
+        <View
+            style={[styles.container, { paddingTop: top }]}
         >
             <StatusBar hidden={false} barStyle={'dark-content'} />
             <View style={{ paddingHorizontal: 20 }}>
@@ -71,7 +71,7 @@ export default function DashboardScreen() {
                     <MyButton style={styles.addButton} label='Add' />
                 </Link>
             </BottomAction>
-        </KeyboardAvoidingView>
+        </View>
     );
 }
 

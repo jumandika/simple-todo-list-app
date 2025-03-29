@@ -59,6 +59,9 @@ const TaskList = ({ selectedDay }: TaskListProps) => {
         const filtered = val.filter((item) => formatDateDDMMYYYY(new Date(item.dueDate)) === selectedDay)
         setFilteredTodos(sortAndGroupTasks(filtered));
         setIsLoading(false)
+        setTimeout(() => {
+            setActiveID(null)
+        }, 1000);
     }
 
     const handleDelete = async (id: string) => {
