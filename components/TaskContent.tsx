@@ -12,9 +12,6 @@ import MyText from "./MyText";
 import Spacer from "./Spacer";
 import { useEffect } from "react";
 
-if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
-    UIManager.setLayoutAnimationEnabledExperimental(true);
-}
 
 interface TaskContentProps {
     activeID: string | null;
@@ -24,11 +21,26 @@ interface TaskContentProps {
     toggleTaskCompletion: (taskId: string) => Promise<void>;
 }
 
+if (
+    Platform.OS === 'android' &&
+    UIManager.setLayoutAnimationEnabledExperimental
+) {
+    UIManager.setLayoutAnimationEnabledExperimental(true);
+}
+
 const TaskContent: React.FC<TaskContentProps> = ({ activeID, handleDelete, item, setActiveID, toggleTaskCompletion }) => {
 
     useEffect(() => {
-        activeID == null && LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-    }, [activeID]);
+        // LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+        LayoutAnimation.configureNext({
+            duration: 1000,
+            create: {
+                type: LayoutAnimation.Types.easeInEaseOut,
+                property: LayoutAnimation.Properties.opacity,
+            },
+            update: { type: LayoutAnimation.Types.easeInEaseOut },
+        });
+    }, [activeID, item.id]);
 
     const createdDateInformation = timeAgo(item.createdAt);
     let dueDateInformation = completeTimeLabel(item.dueDate);
@@ -38,6 +50,13 @@ const TaskContent: React.FC<TaskContentProps> = ({ activeID, handleDelete, item,
     }
     const backgroundColor = item.isCompleted ? color.primaryLight : color.gray
     const borderColor = item.isCompleted ? color.primary : overdueStatus ? color.secondary : color.gray
+    const onPress = () => {
+        router.navigate({
+            pathname: '/details',
+            params: { itemDetails: JSON.stringify(item) }
+        })
+        setActiveID(item.id)
+    }
 
     return (
         activeID == item.id ?
@@ -51,13 +70,7 @@ const TaskContent: React.FC<TaskContentProps> = ({ activeID, handleDelete, item,
                     <AntDesign name='close' color={color.white} size={10} />
                 </Pressable>
                 <Card
-                    onPress={() => {
-                        setActiveID(item.id)
-                        router.navigate({
-                            pathname: '/details',
-                            params: { itemDetails: JSON.stringify(item) }
-                        })
-                    }}
+                    onPress={onPress}
                     style={[styles.cardContainer, {
                         backgroundColor,
                         borderColor,
