@@ -17,6 +17,7 @@ const BottomAction = ({ style, children }: BottomActionProps) => {
 
 const styles = StyleSheet.create({
     container: {
+        width: '100%',
         flexDirection: "row",
         position: "absolute",
         bottom: 0,
